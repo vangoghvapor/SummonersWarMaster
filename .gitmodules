@@ -1,0 +1,4 @@
+[submodule "tools/sw-exporter"]
+	path = tools/sw-exporter
+	url = https://github.com/Xzandro/sw-exporter.git
+	branch = master
