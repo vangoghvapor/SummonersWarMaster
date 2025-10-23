@@ -1,4 +1,4 @@
 [submodule "tools/sw-exporter"]
 	path = tools/sw-exporter
-	url = https://github.com/Xzandro/sw-exporter.git
+	url = https://github.com/vangoghvapor/sw-exporter-swmaster.git
 	branch = master
