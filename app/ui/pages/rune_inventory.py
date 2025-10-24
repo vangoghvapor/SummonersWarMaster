@@ -24,7 +24,7 @@ TABLE_COLUMNS = [
 
 
 
-def page(export_dir: Path):
+def rune_page(export_dir: Path):
     STATE = {'mapping': [], 'df': pd.DataFrame()}
 
     with ui.header().classes('items-center gap-3'):
