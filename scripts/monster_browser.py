@@ -8,38 +8,15 @@ import json, os, time, re
 import pandas as pd
 import requests
 
-# ---------- config ----------
-REPO = Path(__file__).resolve().parents[1]
-EXPORT_DIR = REPO / 'data' / 'swex' / 'exports' / 'profile saves'
-MONSTER_NAME_MAP = REPO / 'data' / 'swex' / 'monster_names.json'  # optional
-CACHE_DIR = REPO / 'data' / 'swex' / 'cache'
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
-SWARFARM_CACHE = CACHE_DIR / 'swarfarm_monsters.json'
+from app.config import ICONS_DIR, SWARFARM_CACHE, MONSTER_NAME_MAP, EXPORT_DIR, HOST, PORT
+from app.logic.data_loading.profiles import find_profiles, load_profile
+from app.model.runes import FILENAME_BY_SET, STAT, SET, SET_REQ
 
-# rune set icons (local assets)
-ICONS_DIR = REPO / 'tools' / 'sw-exporter' / 'assets' / 'runes'
 app.add_static_files('/swex_icons', str(ICONS_DIR.resolve()))
-
-HOST, PORT = '127.0.0.1', 8081
-
-SET = {
-    1:"Energy",2:"Guard",3:"Swift",4:"Blade",5:"Rage",6:"Focus",7:"Endure",
-    8:"Fatal",10:"Despair",11:"Vampire",13:"Violent",14:"Nemesis",15:"Will",
-    16:"Shield",17:"Revenge",18:"Destroy",19:"Fight",20:"Determination",
-    21:"Enhance",22:"Accuracy",23:"Tolerance",
-}
-# how many runes complete each set
-SET_REQ = {1:2,2:2,3:4,4:2,5:4,6:2,7:2,8:4,10:4,11:4,13:4,14:2,15:2,16:2,17:2,18:2,19:2,20:2,21:2,22:2,23:2}
-STAT = {1:"HP",2:"HP%",3:"ATK",4:"ATK%",5:"DEF",6:"DEF%",8:"SPD",9:"CRI Rate",10:"CRI Dmg",11:"RES",12:"ACC"}
 
 # ---------- icon map from SWEX assets ----------
 def _build_icon_map() -> dict[int, str]:
-    filename_by_set = {
-        1:'Energy.png', 2:'Guard.png', 3:'Swift.png', 4:'Blade.png', 5:'Rage.png',
-        6:'Focus.png', 7:'Endure.png', 8:'Fatal.png', 10:'Despair.png', 11:'Vampire.png',
-        13:'Violent.png', 14:'Nemesis.png', 15:'Will.png', 16:'Shield.png', 17:'Revenge.png',
-        18:'Destroy.png', 19:'Fight.png', 20:'Determination.png', 21:'Enhance.png', 22:'Accuracy.png', 23:'Tolerance.png',
-    }
+    filename_by_set = FILENAME_BY_SET
     icon_map = {}
     for sid, fname in filename_by_set.items():
         p = ICONS_DIR / fname
@@ -268,26 +245,9 @@ def monster_name(master_id: int) -> str:
             _name_map_cache = {}
     return _name_map_cache.get(int(master_id), f"ID:{master_id}")
 
-def find_profiles(dir_path: Path):
-    if not dir_path.exists(): return []
-    files = sorted(dir_path.glob('*.json'), key=os.path.getmtime, reverse=True)
-    out = []
-    for p in files:
-        try:
-            data = json.loads(p.read_text(encoding='utf-8'))
-            wiz = data.get('wizard_info') or {}
-            if not wiz: continue
-            name = wiz.get('wizard_name') or '(unknown)'
-            wid  = wiz.get('wizard_id') or '?'
-            lvl  = wiz.get('wizard_level') or '?'
-            ts   = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(p.stat().st_mtime))
-            out.append((f"{name} [{wid}] Lv{lvl} — {ts} — {p.name}", str(p)))
-        except Exception:
-            continue
-    return out
 
-def load_profile(path: Path):
-    return json.loads(path.read_text(encoding='utf-8'))
+
+
 
 def build_rune_equip_map(profile: dict) -> dict[int, int]:
     """Return {rune_id: unit_id} using unit_list[*], equip_info_list, and top-level runes."""

@@ -3,6 +3,13 @@ from pathlib import Path
 import json, os, time
 from typing import List, Tuple
 
+
+
+def load_profile(path: Path):
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+
 def find_profiles(dir_path: Path) -> List[Tuple[str, str]]:
     if not dir_path.exists(): return []
     files = sorted(dir_path.glob('*.json'), key=os.path.getmtime, reverse=True)
