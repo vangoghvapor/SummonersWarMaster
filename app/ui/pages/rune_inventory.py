@@ -8,6 +8,22 @@ from app.logic.data_loading.rune_io import load_runes_df
 from app.logic.formatting.filters import filter_runes
 from app.logic.formatting.summaries import summary_lines
 
+TABLE_COLUMNS = [
+        {'name':'rune_id','label':'ID','field':'rune_id','align':'left','sortable':True},
+        {'name':'slot','label':'Slot','field':'slot','sortable':True},
+        {'name':'set','label':'Set','field':'set','sortable':True},
+        {'name':'grade★','label':'★','field':'grade★','sortable':True},
+        {'name':'level','label':'+','field':'level','sortable':True},
+        {'name':'main','label':'Main','field':'main','sortable':True},
+        {'name':'innate','label':'Innate','field':'innate','sortable':True},
+        {'name':'subs','label':'Subs','field':'subs'},
+        {'name':'equipped','label':'Eq','field':'equipped','sortable':True},
+        {'name':'equipped_unit_id','label':'Unit ID','field':'equipped_unit_id'},
+        {'name':'score','label':'Score','field':'score','sortable':True},
+    ]
+
+
+
 def page(export_dir: Path):
     STATE = {'mapping': [], 'df': pd.DataFrame()}
 
@@ -34,19 +50,7 @@ def page(export_dir: Path):
         summary_line3 = ui.label('')
         summary_line4 = ui.label('')
 
-    columns = [
-        {'name':'rune_id','label':'ID','field':'rune_id','align':'left','sortable':True},
-        {'name':'slot','label':'Slot','field':'slot','sortable':True},
-        {'name':'set','label':'Set','field':'set','sortable':True},
-        {'name':'grade★','label':'★','field':'grade★','sortable':True},
-        {'name':'level','label':'+','field':'level','sortable':True},
-        {'name':'main','label':'Main','field':'main','sortable':True},
-        {'name':'innate','label':'Innate','field':'innate','sortable':True},
-        {'name':'subs','label':'Subs','field':'subs'},
-        {'name':'equipped','label':'Eq','field':'equipped','sortable':True},
-        {'name':'equipped_unit_id','label':'Unit ID','field':'equipped_unit_id'},
-        {'name':'score','label':'Score','field':'score','sortable':True},
-    ]
+    columns = TABLE_COLUMNS
     table = ui.table(columns=columns, rows=[], row_key='rune_id',
                      pagination={'rowsPerPage': 20}).classes('m-4')
 
