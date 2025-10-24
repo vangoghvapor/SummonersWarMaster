@@ -9,7 +9,9 @@ import pandas as pd
 import requests
 
 from app.config import ICONS_DIR, SWARFARM_CACHE, MONSTER_NAME_MAP, EXPORT_DIR, HOST, PORT
+from app.logic.calc.rune_calc import rune_score_300
 from app.logic.data_loading.profiles import find_profiles, load_profile
+from app.logic.formatting.formatters import fmt_eff
 from app.model.runes import FILENAME_BY_SET, STAT, SET, SET_REQ
 
 app.add_static_files('/swex_icons', str(ICONS_DIR.resolve()))
@@ -218,18 +220,6 @@ def _totals_innate_subs(r):
     for e in (r.get('sec_eff') or []): _acc(s, e)
     return s
 
-def rune_score_300(r):
-    s = _totals_innate_subs(r)
-    part_pct = (s['hp_pct'] + s['atk_pct'] + s['def_pct'] + s['acc'] + s['res']) / 40.0
-    part_spd = (s['spd'] + s['cr']) / 30.0
-    part_cd  = s['cd'] / 35.0
-    part_flat = 0.35 * ((s['hp_flat']/1875.0) + ((s['atk_flat']+s['def_flat'])/100.0))
-    return round((part_pct + part_spd + part_cd + part_flat) * 100.0, 1)
-
-def fmt_eff(e):
-    if not e or e[0] == 0: return ""
-    t, v = e[0], e[1]
-    return f"{STAT.get(t, f'Type{t}')} +{v}"
 
 # ---------- profile I/O ----------
 _name_map_cache = None
