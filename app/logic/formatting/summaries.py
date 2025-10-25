@@ -2,6 +2,8 @@
 import re
 import pandas as pd
 
+
+
 def summary_lines(df_in: pd.DataFrame) -> tuple[str,str,str,str]:
     if df_in.empty:
         return ('No runes','','','')
@@ -36,3 +38,47 @@ def summary_lines(df_in: pd.DataFrame) -> tuple[str,str,str,str]:
     line3 = f'Slots: {slots_str}   |   Fastest SPD: +{spd_max}   |   Runes w/ SPD sub: {spd_sub_count}'
     line4 = f'Avg score: {avg_score:.1f}   |   p95: {p95_score:.1f}   |   Top: {top_desc}'
     return (line1, line2, line3, line4)
+
+
+# app/logic/sets_summaries.py
+import pandas as pd
+from app.model.runes import SET, SET_REQ
+
+def summarize_sets_for_unit(df_unit: pd.DataFrame, set_icon_path: dict[int,str]) -> pd.Series:
+    if df_unit.empty:
+        return pd.Series({'sets_compact':'', 'sets_icons': []})
+    by_set = df_unit['set_id'].value_counts().to_dict()
+    parts, icons = [], []
+    for sid, cnt in by_set.items():
+        req = SET_REQ.get(int(sid), 2)
+        completed = cnt // req
+        if completed <= 0:
+            continue
+        name = SET.get(int(sid), f"Set{sid}")
+        parts.append(f"{name}×{completed}" if completed > 1 else name)
+        path = set_icon_path.get(int(sid), '')
+        icons.append({'path': path, 'name': name, 'count': int(completed)})
+    parts = sorted(parts, key=str.lower)
+    icons = sorted(icons, key=lambda d: d['name'].lower())
+    return pd.Series({'sets_compact':' | '.join(parts), 'sets_icons': icons})
+
+def join_equipped(mon_df: pd.DataFrame, runes_df: pd.DataFrame, set_icon_path: dict[int,str]) -> pd.DataFrame:
+    if mon_df.empty or runes_df.empty:
+        mon_df = mon_df.copy()
+        mon_df['runes']=0; mon_df['sets']=''; mon_df['sets_compact']=''; mon_df['sets_icons']=[[]]
+        return mon_df
+    counts = runes_df.groupby('unit_id').size().rename('runes')
+    verbose_sets = (runes_df.groupby('unit_id')['set']
+                    .apply(lambda s: ', '.join(sorted(s.tolist())))
+                    .rename('sets'))
+    per_unit = (runes_df[runes_df['unit_id'] != 0]
+                .groupby('unit_id')
+                .apply(lambda dfu: summarize_sets_for_unit(dfu, set_icon_path)))
+    out = (mon_df.merge(counts, how='left', left_on='unit_id', right_index=True)
+                 .merge(verbose_sets, how='left', left_on='unit_id', right_index=True)
+                 .merge(per_unit, how='left', left_on='unit_id', right_index=True))
+    out['runes'] = out['runes'].fillna(0).astype(int)
+    out['sets'] = out['sets'].fillna('')
+    out['sets_compact'] = out['sets_compact'].fillna('')
+    out['sets_icons'] = out['sets_icons'].apply(lambda v: v if isinstance(v, list) else [])
+    return out

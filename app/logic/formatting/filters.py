@@ -30,3 +30,48 @@ def filter_runes(df_in: pd.DataFrame, set_value: str, slot_value: str,
         )
         out = out[mask]
     return out
+
+
+def filter_monsters(
+    df: pd.DataFrame,
+    *,
+    stars="(any)",
+    lv_min=1,
+    lv_max=50,
+    min_runes=0,
+    query=""
+) -> pd.DataFrame:
+    if df.empty:
+        return df
+    out = df
+
+    # stars
+    if stars != "(any)":
+        try:
+            out = out[out["★"] == int(stars)]
+        except Exception:
+            pass
+
+    # level range
+    try:
+        lv_min = int(lv_min or 1)
+        lv_max = int(lv_max or 50)
+        out = out[(out["level"] >= lv_min) & (out["level"] <= lv_max)]
+    except Exception:
+        pass
+
+    # min runes
+    try:
+        min_runes = int(min_runes or 0)
+        out = out[out["runes"] >= min_runes]
+    except Exception:
+        pass
+
+    # text query over name / sets
+    q = (query or "").strip().lower()
+    if q:
+        name_mask = out["name"].str.lower().str.contains(q, na=False)
+        set_mask  = out["sets_compact"].str.lower().str.contains(q, na=False)
+        out = out[name_mask | set_mask]
+
+    return out
