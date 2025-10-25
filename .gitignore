@@ -1,0 +1,10 @@
+# --- Data dumps & cache (SWEX) ---
+/data/swex/exports/**
+/data/swex/cache/**
+
+# --- WinDivert & bundled binaries ---
+/tools/windivert/**
+/tools/sw-exporter/WinDivert.dll
+
+# --- IDE project files ---
+/.idea/
