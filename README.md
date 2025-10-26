@@ -38,16 +38,14 @@ setup python:
 
     pip install -r requirements.txt
 
+    run app/main.py
 
-setup Win-Divert:
-    run
-
-    scripts\run_swex.cmd
-After:
-
-    the sw-exporter window should open,
+    a browser window of this app and the sw-exporter window should open,
 
 If this is your first time running it:
+
+
+***SW-Exporter Setup for SummonersWarMaster
 
         copy the absolute path of data/swex/exports
         open settings in sw-exporter and set Export / Output Directory to that path
@@ -61,21 +59,23 @@ If this is your first time running it:
 
 NOW:
 
-        Start Proxy Server
+        Start Proxy Server (future runs only need this step)
 
-*** now Run SummonersWar on steam***
+
+*** now Run SummonersWar on steam ***
 
 Logging in should generate the needed files
 check data/swex/exports to see if json files are being created
 
 
-***Run UI***
+***Running the app***
 
     run
 
-    scripts\rune_viewer.py
-    
-    logs need to have been generated first for this to work
+    app/main.py
+
+    a browser window should open with the app and a seperate window should open with sw-exporter
+    to update data in the app, start the proxy server, and play the game to generate logs
 
 ***
 
